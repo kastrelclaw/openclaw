@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skills": {
+    "nano-pdf": {
+      "version": "1.0.0",
+      "installedAt": 1775976518584
+    },
+    "openai-whisper-api": {
+      "version": "1.0.0",
+      "installedAt": 1775976530611
+    }
+  }
+}
