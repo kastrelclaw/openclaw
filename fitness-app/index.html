@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Jeff's Fitness Coach</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #17324d;
+      --muted: #58708a;
+      --accent: #1c7ed6;
+      --accent-2: #12b886;
+      --border: #d8e2ee;
+      --danger: #e03131;
+      --shadow: 0 12px 30px rgba(23, 50, 77, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1, h2, h3 { margin: 0 0 12px; }
+    p { margin: 0 0 12px; }
+
+    .hero, .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .mode-grid, .button-row, .exercise-actions {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mode-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .button-row { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    .exercise-actions { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-top: 16px; }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: var(--accent);
+      box-shadow: 0 8px 16px rgba(28, 126, 214, 0.22);
+    }
+
+    button.secondary {
+      background: #6c7a89;
+      box-shadow: none;
+    }
+
+    button.success {
+      background: var(--accent-2);
+      box-shadow: 0 8px 16px rgba(18, 184, 134, 0.22);
+    }
+
+    button.danger {
+      background: var(--danger);
+      box-shadow: 0 8px 16px rgba(224, 49, 49, 0.22);
+    }
+
+    button.ghost {
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+      box-shadow: none;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .selected {
+      outline: 4px solid rgba(28, 126, 214, 0.2);
+    }
+
+    .today-box {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .exercise-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .timer {
+      font-size: 3.2rem;
+      font-weight: 700;
+      margin: 14px 0;
+    }
+
+    .big-note {
+      font-size: 1.15rem;
+      background: #eef6ff;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 8px 0 0;
+    }
+
+    li { margin-bottom: 8px; }
+
+    details {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1.05rem;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 12px 0 24px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.7rem; }
+      .timer { font-size: 2.6rem; }
+      button { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <h1>Jeff's Fitness Coach</h1>
+      <p class="muted">Simple daily guidance with large buttons, spoken instructions, and timers for Android.</p>
+    </section>
+
+    <section class="card">
+      <h2>Choose your plan</h2>
+      <p class="muted">Use Swimming Season most of the year. Use February when sea swimming is not practical.</p>
+      <div class="mode-grid">
+        <button id="mode-swim" class="selected">Swimming Season</button>
+        <button id="mode-feb" class="ghost">February</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Today</h2>
+      <div id="today-title" class="today-box"></div>
+      <p id="today-summary"></p>
+      <div class="button-row" style="margin-top: 14px;">
+        <button id="start-today" class="success">Start Today's Session</button>
+        <button id="speak-plan" class="secondary">Speak Today's Plan</button>
+      </div>
+      <div class="big-note">Tip: On Android Chrome, open the menu and choose <strong>Add to Home screen</strong> to use this like a simple app.</div>
+    </section>
+
+    <section class="card">
+      <h2>Live Session</h2>
+      <div id="session-status" class="muted">Press “Start Today's Session” when you’re ready.</div>
+      <div id="exercise-name" class="exercise-name">No session running</div>
+      <div id="exercise-detail"></div>
+      <div id="timer" class="timer">00:00</div>
+      <div class="exercise-actions">
+        <button id="play-pause">Start</button>
+        <button id="skip" class="secondary">Next</button>
+        <button id="repeat" class="ghost">Repeat Voice</button>
+        <button id="stop" class="danger">Stop</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Exercise meanings</h2>
+      <details>
+        <summary>Tap to read simple explanations</summary>
+        <ul>
+          <li><strong>Chair squat:</strong> Sit down onto a chair, then stand up again. Good for legs and hips.</li>
+          <li><strong>Hip hinge with dumbbells:</strong> Hold the weights, keep your back straight, bend a little from the hips, then stand tall again.</li>
+          <li><strong>Shoulder press:</strong> Push the dumbbells up from shoulder height, then lower them slowly.</li>
+          <li><strong>One-arm row:</strong> Pull one dumbbell upward toward your ribs while leaning forward a little.</li>
+          <li><strong>Floor chest press:</strong> Lie on your back and press the dumbbells upward from your chest.</li>
+          <li><strong>Wall push-up:</strong> Push yourself away from a wall or counter. Easier than floor push-ups.</li>
+          <li><strong>Farmer walk:</strong> Hold weights in your hands and walk slowly with good posture.</li>
+          <li><strong>Calf raise:</strong> Lift your heels up, then lower them again.</li>
+          <li><strong>Single-leg stand:</strong> Stand on one leg while holding a chair or wall if needed.</li>
+          <li><strong>Heel-to-toe walk:</strong> Walk in a straight line, heel touching the toes of the other foot.</li>
+          <li><strong>Hip stretch:</strong> Gentle stretch for the front of the hip.</li>
+          <li><strong>Hamstring stretch:</strong> Gentle stretch for the back of the thigh.</li>
+          <li><strong>Upper-back twist:</strong> Gentle turning of the upper body to keep the back mobile.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Safety</h2>
+      <ul>
+        <li>Work at a steady pace, not an exhausting one.</li>
+        <li>Stop if you feel chest pain, dizziness, unusual shortness of breath, or sharp pain.</li>
+        <li>In hot weather, exercise early or late and drink water.</li>
+        <li>If anything medical changes, check with a doctor before increasing intensity.</li>
+      </ul>
+    </section>
+
+    <div class="footer">Made for Jeff, simple, steady, and easy to follow.</div>
+  </div>
+
+  <script>
+    const plans = {
+      swimming: {
+        name: 'Swimming Season',
+        days: {
+          0: { title: 'Sunday, Easy Recovery Day', summary: 'Gentle walk for 20 minutes, then 10 minutes of easy stretching.', items: [
+            { name: 'Gentle walk', detail: 'Walk at an easy pace.', seconds: 1200, intro: 'Start with a gentle 20 minute walk.' },
+            { name: 'Easy stretching', detail: 'Stretch hips, calves, hamstrings, shoulders, and back.', seconds: 600, intro: 'Now do 10 minutes of easy stretching.' }
+          ]},
+          1: { title: 'Monday, Sea Swim Day', summary: 'Swim for 35 minutes, then stretch for 10 minutes.', items: [
+            { name: 'Sea swim', detail: 'Swim at a comfortable steady pace.', seconds: 2100, intro: 'Time for your swim. Go for 35 minutes at a comfortable steady pace.' },
+            { name: 'Stretching', detail: 'Stretch shoulders, calves, hips, and hamstrings.', seconds: 600, intro: 'Now do 10 minutes of stretching.' }
+          ]},
+          2: { title: 'Tuesday, Strength and Balance', summary: 'About 35 minutes of home strength work plus 8 minutes of balance.', items: [
+            { name: 'Warm-up march', detail: 'March on the spot and roll your shoulders.', seconds: 180, intro: 'Begin with a 3 minute warm-up march.' },
+            { name: 'Chair squats', detail: 'Sit to chair and stand up again. 2 sets of 10.', seconds: 180, intro: 'Do chair squats, two sets of ten.' },
+            { name: 'Hip hinge with dumbbells', detail: 'Light weights, straight back, bend a little at the hips. 2 sets of 10.', seconds: 180, intro: 'Now do hip hinges with your dumbbells, two sets of ten.' },
+            { name: 'One-arm row', detail: 'Pull one weight toward your ribs. 2 sets of 10 each side.', seconds: 240, intro: 'Next, one-arm rows, two sets of ten on each side.' },
+            { name: 'Shoulder press', detail: 'Press weights up gently. 2 sets of 8 to 10.', seconds: 180, intro: 'Now shoulder presses, two sets of eight to ten.' },
+            { name: 'Wall push-ups', detail: 'Push against a wall or counter. 2 sets of 10.', seconds: 180, intro: 'Now wall push-ups, two sets of ten.' },
+            { name: 'Calf raises', detail: 'Lift heels, lower slowly. 2 sets of 12.', seconds: 150, intro: 'Now calf raises, two sets of twelve.' },
+            { name: 'Single-leg stand', detail: 'Hold a chair if needed. Alternate legs.', seconds: 120, intro: 'Now practice standing on one leg, changing legs as needed.' },
+            { name: 'Heel-to-toe walk', detail: 'Walk in a straight line slowly.', seconds: 120, intro: 'Finish with a slow heel-to-toe walk.' }
+          ]},
+          3: { title: 'Wednesday, Bike or Walk', summary: 'Cycle for 40 minutes if weather is kind, otherwise brisk walk for 30 minutes, then mobility for 10 minutes.', items: [
+            { name: 'Bike ride or brisk walk', detail: 'Choose a bike ride for 40 minutes, or a brisk walk for 30 minutes.', seconds: 2400, intro: 'Choose your ride or walk and keep a comfortable pace.' },
+            { name: 'Mobility', detail: 'Do hip stretch, hamstring stretch, shoulder circles, and upper-back twists.', seconds: 600, intro: 'Now do 10 minutes of mobility work.' }
+          ]},
+          4: { title: 'Thursday, Sea Swim and Balance', summary: 'Swim for 35 minutes, then balance work for 8 minutes.', items: [
+            { name: 'Sea swim', detail: 'Comfortable steady swim.', seconds: 2100, intro: 'Time for another steady swim, 35 minutes.' },
+            { name: 'Balance work', detail: 'Single-leg stand and heel-to-toe walk.', seconds: 480, intro: 'Now do 8 minutes of balance work.' }
+          ]},
+          5: { title: 'Friday, Strength and Stretching', summary: 'Repeat the home strength session, then 10 minutes of stretching.', items: [
+            { name: 'Warm-up march', detail: 'March on the spot and loosen shoulders.', seconds: 180, intro: 'Begin with your 3 minute warm-up march.' },
+            { name: 'Chair squats', detail: '2 sets of 10.', seconds: 180, intro: 'Chair squats, two sets of ten.' },
+            { name: 'Floor chest press', detail: 'Lie on your back and press weights upward. 2 sets of 10.', seconds: 180, intro: 'Now floor chest presses, two sets of ten.' },
+            { name: 'One-arm row', detail: '2 sets of 10 each side.', seconds: 240, intro: 'Next, one-arm rows, two sets of ten on each side.' },
+            { name: 'Shoulder press', detail: '2 sets of 8 to 10.', seconds: 180, intro: 'Now shoulder presses, two sets of eight to ten.' },
+            { name: 'Farmer walk', detail: 'Hold weights and walk steadily with good posture.', seconds: 180, intro: 'Now do a farmer walk for 3 minutes.' },
+            { name: 'Stretching', detail: 'Stretch calves, hips, thighs, and shoulders.', seconds: 600, intro: 'Finish with 10 minutes of stretching.' }
+          ]},
+          6: { title: 'Saturday, Enjoyable Outdoor Day', summary: 'Easy bike ride or a longer walk for 45 to 60 minutes.', items: [
+            { name: 'Outdoor session', detail: 'Choose an easy enjoyable ride or walk.', seconds: 2700, intro: 'Enjoy your outdoor session at an easy pace.' }
+          ]}
+        }
+      },
+      february: {
+        name: 'February',
+        days: {
+          0: { title: 'Sunday, Easy Recovery Day', summary: 'Gentle walk and light stretching.', items: [
+            { name: 'Gentle walk', detail: 'Walk easily for 20 minutes.', seconds: 1200, intro: 'Start with a gentle 20 minute walk.' },
+            { name: 'Easy stretching', detail: 'Stretch hips, legs, shoulders, and back.', seconds: 600, intro: 'Now do 10 minutes of easy stretching.' }
+          ]},
+          1: { title: 'Monday, Indoor Cardio and Mobility', summary: 'Brisk walk 30 minutes, then mobility 10 minutes.', items: [
+            { name: 'Brisk walk', detail: 'Walk at a lively pace.', seconds: 1800, intro: 'Walk briskly for 30 minutes.' },
+            { name: 'Mobility', detail: 'Hip stretch, hamstring stretch, shoulder circles, upper-back twists.', seconds: 600, intro: 'Now do 10 minutes of mobility work.' }
+          ]},
+          2: { title: 'Tuesday, Strength and Balance', summary: 'Home strength routine plus balance practice.', items: [
+            { name: 'Warm-up march', detail: 'March on the spot.', seconds: 180, intro: 'Begin with a 3 minute warm-up march.' },
+            { name: 'Chair squats', detail: '2 sets of 10.', seconds: 180, intro: 'Chair squats, two sets of ten.' },
+            { name: 'Hip hinge with dumbbells', detail: '2 sets of 10.', seconds: 180, intro: 'Now hip hinges with your dumbbells.' },
+            { name: 'One-arm row', detail: '2 sets of 10 each side.', seconds: 240, intro: 'Next, one-arm rows.' },
+            { name: 'Wall push-ups', detail: '2 sets of 10.', seconds: 180, intro: 'Now wall push-ups.' },
+            { name: 'Calf raises', detail: '2 sets of 12.', seconds: 150, intro: 'Now calf raises.' },
+            { name: 'Balance practice', detail: 'Single-leg stand and heel-to-toe walk.', seconds: 240, intro: 'Finish with your balance practice.' }
+          ]},
+          3: { title: 'Wednesday, Bike or Walk', summary: 'Cycle if weather allows, otherwise walk, plus stretching.', items: [
+            { name: 'Bike ride or brisk walk', detail: '40 minute bike ride or 30 minute brisk walk.', seconds: 2400, intro: 'Choose your ride or walk.' },
+            { name: 'Stretching', detail: 'Stretch legs, hips, shoulders, and back.', seconds: 600, intro: 'Now do 10 minutes of stretching.' }
+          ]},
+          4: { title: 'Thursday, Home Mobility and Balance', summary: 'A lighter day focusing on movement quality.', items: [
+            { name: 'Mobility routine', detail: 'Hip stretch, hamstring stretch, shoulder circles, upper-back twists.', seconds: 900, intro: 'Today is a lighter mobility session for 15 minutes.' },
+            { name: 'Balance practice', detail: 'Single-leg stand and heel-to-toe walk.', seconds: 300, intro: 'Now do 5 minutes of balance practice.' }
+          ]},
+          5: { title: 'Friday, Strength and Stretching', summary: 'Repeat the strength routine and finish with stretching.', items: [
+            { name: 'Warm-up march', detail: '3 minute warm-up.', seconds: 180, intro: 'Begin with your 3 minute warm-up march.' },
+            { name: 'Chair squats', detail: '2 sets of 10.', seconds: 180, intro: 'Chair squats, two sets of ten.' },
+            { name: 'Floor chest press', detail: '2 sets of 10.', seconds: 180, intro: 'Now floor chest presses.' },
+            { name: 'One-arm row', detail: '2 sets of 10 each side.', seconds: 240, intro: 'Next, one-arm rows.' },
+            { name: 'Shoulder press', detail: '2 sets of 8 to 10.', seconds: 180, intro: 'Now shoulder presses.' },
+            { name: 'Farmer walk', detail: 'Walk holding weights with good posture.', seconds: 180, intro: 'Now do a farmer walk for 3 minutes.' },
+            { name: 'Stretching', detail: '10 minutes of stretching.', seconds: 600, intro: 'Finish with 10 minutes of stretching.' }
+          ]},
+          6: { title: 'Saturday, Longer Walk', summary: 'Walk 40 to 50 minutes at an easy enjoyable pace.', items: [
+            { name: 'Longer walk', detail: 'Stay comfortable and enjoy the outing.', seconds: 2700, intro: 'Enjoy a longer easy walk today.' }
+          ]}
+        }
+      }
+    };
+
+    const modeSwimBtn = document.getElementById('mode-swim');
+    const modeFebBtn = document.getElementById('mode-feb');
+    const todayTitle = document.getElementById('today-title');
+    const todaySummary = document.getElementById('today-summary');
+    const startTodayBtn = document.getElementById('start-today');
+    const speakPlanBtn = document.getElementById('speak-plan');
+    const sessionStatus = document.getElementById('session-status');
+    const exerciseName = document.getElementById('exercise-name');
+    const exerciseDetail = document.getElementById('exercise-detail');
+    const timerEl = document.getElementById('timer');
+    const playPauseBtn = document.getElementById('play-pause');
+    const skipBtn = document.getElementById('skip');
+    const repeatBtn = document.getElementById('repeat');
+    const stopBtn = document.getElementById('stop');
+
+    let selectedMode = 'swimming';
+    let queue = [];
+    let currentIndex = -1;
+    let remainingSeconds = 0;
+    let interval = null;
+    let running = false;
+
+    function getTodayPlan() {
+      const day = new Date().getDay();
+      return plans[selectedMode].days[day];
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.92;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function ding() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.45);
+    }
+
+    function updateTodayCard() {
+      const today = getTodayPlan();
+      todayTitle.textContent = `${plans[selectedMode].name}: ${today.title}`;
+      todaySummary.textContent = today.summary;
+    }
+
+    function setMode(mode) {
+      selectedMode = mode;
+      modeSwimBtn.className = mode === 'swimming' ? 'selected' : 'ghost';
+      modeFebBtn.className = mode === 'february' ? 'selected' : 'ghost';
+      updateTodayCard();
+      stopSession(false);
+    }
+
+    function startSession() {
+      const today = getTodayPlan();
+      queue = today.items.slice();
+      currentIndex = -1;
+      sessionStatus.textContent = 'Session started.';
+      nextExercise();
+    }
+
+    function nextExercise() {
+      clearInterval(interval);
+      currentIndex += 1;
+      if (currentIndex >= queue.length) {
+        running = false;
+        exerciseName.textContent = 'Session complete';
+        exerciseDetail.textContent = 'Well done. You have finished today’s session.';
+        timerEl.textContent = '00:00';
+        sessionStatus.textContent = 'Finished for today.';
+        playPauseBtn.textContent = 'Start';
+        ding();
+        speak('Well done Jeff. You have finished today\'s session.');
+        return;
+      }
+      const item = queue[currentIndex];
+      remainingSeconds = item.seconds;
+      exerciseName.textContent = item.name;
+      exerciseDetail.textContent = item.detail;
+      timerEl.textContent = formatTime(remainingSeconds);
+      sessionStatus.textContent = `Step ${currentIndex + 1} of ${queue.length}`;
+      playPauseBtn.textContent = 'Pause';
+      running = true;
+      ding();
+      speak(item.intro);
+      interval = setInterval(() => {
+        if (!running) return;
+        remainingSeconds -= 1;
+        timerEl.textContent = formatTime(Math.max(remainingSeconds, 0));
+        if (remainingSeconds <= 0) {
+          ding();
+          nextExercise();
+        }
+      }, 1000);
+    }
+
+    function stopSession(speakOut = true) {
+      clearInterval(interval);
+      running = false;
+      queue = [];
+      currentIndex = -1;
+      remainingSeconds = 0;
+      exerciseName.textContent = 'No session running';
+      exerciseDetail.textContent = '';
+      timerEl.textContent = '00:00';
+      sessionStatus.textContent = 'Press “Start Today\'s Session” when you’re ready.';
+      playPauseBtn.textContent = 'Start';
+      if (speakOut) speak('Session stopped.');
+    }
+
+    modeSwimBtn.addEventListener('click', () => setMode('swimming'));
+    modeFebBtn.addEventListener('click', () => setMode('february'));
+
+    startTodayBtn.addEventListener('click', () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      startSession();
+    });
+
+    speakPlanBtn.addEventListener('click', () => {
+      const today = getTodayPlan();
+      const text = `${today.title}. ${today.summary}`;
+      speak(text);
+    });
+
+    playPauseBtn.addEventListener('click', () => {
+      if (currentIndex === -1 || currentIndex >= queue.length) {
+        startSession();
+        return;
+      }
+      running = !running;
+      playPauseBtn.textContent = running ? 'Pause' : 'Resume';
+      if (running) {
+        speak('Resuming.');
+      } else {
+        speak('Paused.');
+      }
+    });
+
+    skipBtn.addEventListener('click', () => {
+      if (currentIndex === -1) return;
+      speak('Moving to the next exercise.');
+      nextExercise();
+    });
+
+    repeatBtn.addEventListener('click', () => {
+      if (currentIndex === -1 || currentIndex >= queue.length) return;
+      speak(queue[currentIndex].intro + ' ' + queue[currentIndex].detail);
+    });
+
+    stopBtn.addEventListener('click', () => stopSession());
+
+    updateTodayCard();
+  </script>
+</body>
+</html>
