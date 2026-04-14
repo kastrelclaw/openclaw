@@ -1,0 +1,10 @@
+{
+  "name": "Jeff's Fitness Coach",
+  "short_name": "Fitness Coach",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#1c7ed6",
+  "description": "Simple spoken fitness coach with timers for Jeff.",
+  "icons": []
+}
